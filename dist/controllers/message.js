@@ -16,6 +16,7 @@ exports.deleteMessage = exports.markAllMessagesAsRead = exports.createMessage = 
 const message_1 = __importDefault(require("../models/message"));
 const chat_1 = __importDefault(require("../models/chat"));
 const mongoose_1 = __importDefault(require("mongoose")); // Import mongoose for ObjectId type
+const notification_1 = require("./notification");
 // Get all messages for a specific chat
 const getMessagesForChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { chatId } = req.params;
@@ -37,7 +38,7 @@ const getMessagesForChat = (req, res) => __awaiter(void 0, void 0, void 0, funct
 exports.getMessagesForChat = getMessagesForChat;
 // Create a message and add it to an existing chat
 const createMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c, _d;
     const { chatId } = req.params;
     const { text } = req.body;
     try {
@@ -57,6 +58,14 @@ const createMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         });
         // Save the message to the database
         yield message.save();
+        // Notify all participants except the sender
+        const chatObjectId = new mongoose_1.default.Types.ObjectId(chatId);
+        const userObjectId = new mongoose_1.default.Types.ObjectId((_d = (_c = req.user) === null || _c === void 0 ? void 0 : _c._id) === null || _d === void 0 ? void 0 : _d.toString());
+        chat.participants.forEach((participant) => {
+            if (!participant.equals(userObjectId)) {
+                (0, notification_1.createNotification)(participant, message.id, chatObjectId);
+            }
+        });
         // Update the last message in the chat
         chat.lastMessage = message.id;
         yield chat.save();
