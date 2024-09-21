@@ -37,6 +37,7 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     try {
         // Check if user already exists
         const existingUser = yield user_1.default.findOne({ email });
+        console.log(existingUser);
         if (existingUser) {
             return res.status(400).json({
                 success: false,
@@ -56,16 +57,14 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         res.status(201).json({
             success: true,
             data: {
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                },
+                _id: user._id,
+                name: user.name,
+                email: user.email,
             },
         });
     }
     catch (error) {
-        console.error("Error registering user:", error);
+        console.error("Error Registering in:", error);
         res.status(500).json({
             success: false,
             message: "Server error",
@@ -98,11 +97,9 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(200).json({
             success: true,
             data: {
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                },
+                _id: user._id,
+                name: user.name,
+                email: user.email,
             },
         });
     }
@@ -127,12 +124,10 @@ const getUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function*
         res.status(200).json({
             success: true,
             data: {
-                user: {
-                    id: req.user._id,
-                    name: req.user.name,
-                    email: req.user.email,
-                    status: req.user.status,
-                },
+                _id: req.user._id,
+                name: req.user.name,
+                email: req.user.email,
+                status: req.user.status,
             },
         });
     }

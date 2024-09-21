@@ -6,11 +6,11 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const user_1 = require("../controllers/user");
 const authMiddleware_1 = require("../middleware/authMiddleware");
-const router = express_1.default.Router();
+const userRoutes = express_1.default.Router();
 // Register a new user
-router.post("/register", user_1.registerUser);
+userRoutes.post("/register", user_1.registerUser);
 // Login user
-router.post("/login", user_1.loginUser);
+userRoutes.post("/login", user_1.loginUser);
 // Get user profile (protected route)
-router.get("/profile/:id", authMiddleware_1.protect, user_1.getUserProfile);
-exports.default = router;
+userRoutes.get("/profile", authMiddleware_1.protect, user_1.getUserProfile);
+exports.default = userRoutes;

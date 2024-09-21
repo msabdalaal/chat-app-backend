@@ -13,6 +13,9 @@ import userRoutes from "./routes/user";
 import chatRoutes from "./routes/chat";
 import messageRoutes from "./routes/message";
 import groupChatRoutes from "./routes/groupChat";
+import notificationRoutes from "./routes/notification";
+import { setUserOffline, setUserOnline } from "./controllers/presence";
+import mongoose, { mongo } from "mongoose";
 
 declare global {
   namespace Express {
@@ -25,7 +28,7 @@ declare global {
 const port = process.env.PORT || 3000;
 
 const app = express();
-app.use(cookieParser()); // Use cookie-parser middleware
+app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
@@ -38,6 +41,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/chats", chatRoutes);
 app.use("/api/groupChats", groupChatRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/api/notification", notificationRoutes);
 
 const server = http.createServer(app);
 
@@ -49,8 +53,13 @@ const io = new Server(server, {
   },
 });
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
+  const userId = new mongoose.Types.ObjectId(socket.id)
   console.log(`User connected: ${socket.id}`);
+
+  // update user presence
+  await setUserOnline(userId);
+  io.emit("userPresenceUpdate", { userId:socket.id, isOnline: true });
 
   // Join a chat room
   socket.on("joinChat", (chatId: string) => {
@@ -80,8 +89,13 @@ io.on("connection", (socket) => {
   });
 
   // Handle user disconnect
-  socket.on("disconnect", () => {
+  socket.on("disconnect", async () => {
     console.log(`User disconnected: ${socket.id}`);
+
+    // update user presence
+    await setUserOffline(userId);
+    console.log(`User ${userId} is offline`);
+    io.emit("userPresenceUpdate", { userId:socket.id, isOnline: false });
   });
 });
 

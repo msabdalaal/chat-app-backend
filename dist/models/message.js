@@ -16,7 +16,7 @@ const messageSchema = new mongoose_1.default.Schema({
         required: true,
     },
     text: { type: String, required: true },
-    read: { type: Boolean, default: false },
+    readBy: [{ type: mongoose_1.default.Schema.Types.ObjectId, ref: "User" }], // New array of users who have read
 }, { timestamps: true });
 const Message = mongoose_1.default.model("Message", messageSchema);
 exports.default = Message;

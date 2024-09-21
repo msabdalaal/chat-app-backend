@@ -23,11 +23,13 @@ export interface IChat extends Document {
 }
 
 export interface INotification extends Document {
-  recipient: mongoose.Types.ObjectId;
-  message: mongoose.Types.ObjectId;
-  isRead: boolean;
+  recipient: mongoose.Types.ObjectId; // The user receiving the notification
+  message: mongoose.Types.ObjectId; // Reference to the message that triggered the notification
+  chat: mongoose.Types.ObjectId; // Reference to the chat
+  isRead: boolean; // Whether the notification has been read
   createdAt: Date;
 }
+
 
 export interface IPresence extends Document {
   userId: mongoose.Types.ObjectId;

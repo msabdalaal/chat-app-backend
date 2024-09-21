@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Message from "../models/message";
 import Chat from "../models/chat";
 import mongoose from "mongoose"; // Import mongoose for ObjectId type
+import { createNotification } from "./notification";
 
 // Get all messages for a specific chat
 export const getMessagesForChat = async (req: Request, res: Response) => {
@@ -51,6 +52,15 @@ export const createMessage = async (req: Request, res: Response) => {
 
     // Save the message to the database
     await message.save();
+
+    // Notify all participants except the sender
+    const chatObjectId= new mongoose.Types.ObjectId(chatId)
+    const userObjectId= new mongoose.Types.ObjectId(req.user?._id?.toString())
+    chat.participants.forEach((participant) => {
+      if (!participant.equals(userObjectId)) {
+        createNotification(participant, message.id, chatObjectId);
+      }
+    });
 
     // Update the last message in the chat
     chat.lastMessage = message.id;
@@ -108,7 +118,6 @@ export const markAllMessagesAsRead = async (req: Request, res: Response) => {
     });
   }
 };
-
 
 // Delete a message
 export const deleteMessage = async (req: Request, res: Response) => {
