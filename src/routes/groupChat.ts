@@ -1,0 +1,28 @@
+import express from "express";
+import { 
+  createGroupChat, 
+  addUserToGroup, 
+  removeUserFromGroup, 
+  updateGroupDetails, 
+  getGroupChatDetails 
+} from "../controllers/groupChat";
+import { protect } from "../middleware/authMiddleware"; // Middleware to protect routes
+
+const groupChatRoutes = express.Router();
+
+// Create a new group chat
+groupChatRoutes.post("/create", protect, createGroupChat);
+
+// Add a user to the group chat
+groupChatRoutes.post("/add", protect, addUserToGroup);
+
+// Remove a user from the group chat
+groupChatRoutes.delete("/delete", protect, removeUserFromGroup);
+
+// Update group chat details (name, image, etc.)
+groupChatRoutes.patch("/update", protect, updateGroupDetails);
+
+// Get group chat details
+groupChatRoutes.get("/:groupId", protect, getGroupChatDetails);
+
+export default groupChatRoutes;
