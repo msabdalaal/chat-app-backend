@@ -25,7 +25,7 @@ const createTokenAndSetCookie = (res: Response, userId: string) => {
     httpOnly: false, // If you need to access cookies from client-side JavaScript
     secure: false, // Ensure secure is false for HTTP (localhost)
     expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days expiration
-    sameSite: "lax", // 'lax' for development, allows cookies to work on HTTP
+    sameSite: "none", // 'lax' for development, allows cookies to work on HTTP
   });
 };
 
