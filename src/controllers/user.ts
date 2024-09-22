@@ -3,7 +3,6 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/user";
 import dotenv from "dotenv";
-import { Types } from "mongoose"; // Import Types to handle ObjectId
 
 dotenv.config();
 
@@ -19,7 +18,7 @@ const createTokenAndSetCookie = (res: Response, userId: string) => {
     httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
     secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
     expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days expiration
-    sameSite: "strict", // CSRF protection
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict", // CSRF protection
   });
 };
 
