@@ -109,6 +109,18 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
+export const logOutUser = async (req: Request, res: Response) => {
+  res.cookie("token", "", {
+    httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
+    secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+    maxAge: 1, // 2 days expiration
+    sameSite: process.env.NODE_ENV === "production" ? "none" : "strict", // CSRF protection
+  });
+  res.status(200).json({
+    success: true,
+    message: "Logout Successfully",
+  });
+};
 // Get user profile (protected route)
 export const getUserProfile = async (req: Request, res: Response) => {
   try {
