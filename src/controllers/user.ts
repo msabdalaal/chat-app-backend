@@ -12,13 +12,20 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 const createTokenAndSetCookie = (res: Response, userId: string) => {
   // Generate a JWT token that expires in 2 days
   const token = jwt.sign({ id: userId }, JWT_SECRET, { expiresIn: "2d" });
+  console.log(process.env.NODE_ENV);
 
   // Set the token as a cookie with httpOnly and secure options
+  // res.cookie("token", token, {
+  //   httpOnly: false, // Prevent client-side JavaScript from accessing the cookie
+  //   secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+  //   expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days expiration
+  //   sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Set sameSite to none in production, lax in development
+  // });
   res.cookie("token", token, {
-    httpOnly: false, // Prevent client-side JavaScript from accessing the cookie
-    secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+    httpOnly: false, // If you need to access cookies from client-side JavaScript
+    secure: false, // Ensure secure is false for HTTP (localhost)
     expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days expiration
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Set sameSite to none in production, lax in development
+    sameSite: "lax", // 'lax' for development, allows cookies to work on HTTP
   });
 };
 

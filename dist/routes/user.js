@@ -11,6 +11,8 @@ const userRoutes = express_1.default.Router();
 userRoutes.post("/register", user_1.registerUser);
 // Login user
 userRoutes.post("/login", user_1.loginUser);
+// Logout user
+userRoutes.post("/logout", user_1.logOutUser);
 // Get user profile (protected route)
 userRoutes.get("/profile", authMiddleware_1.protect, user_1.getUserProfile);
 exports.default = userRoutes;

@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserProfile = exports.loginUser = exports.registerUser = void 0;
+exports.getUserProfile = exports.logOutUser = exports.loginUser = exports.registerUser = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_1 = __importDefault(require("../models/user"));
@@ -23,12 +23,13 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 const createTokenAndSetCookie = (res, userId) => {
     // Generate a JWT token that expires in 2 days
     const token = jsonwebtoken_1.default.sign({ id: userId }, JWT_SECRET, { expiresIn: "2d" });
+    console.log(process.env.NODE_ENV);
     // Set the token as a cookie with httpOnly and secure options
     res.cookie("token", token, {
-        httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
-        // secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+        httpOnly: false, // Prevent client-side JavaScript from accessing the cookie
+        secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
         expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days expiration
-        // sameSite: "strict", // CSRF protection
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Set sameSite to none in production, lax in development
     });
 };
 // Register a new user
@@ -112,6 +113,19 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.loginUser = loginUser;
+const logOutUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    res.cookie("token", "", {
+        httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
+        secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+        maxAge: 1, // 2 days expiration
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "strict", // CSRF protection
+    });
+    res.status(200).json({
+        success: true,
+        message: "Logout Successfully",
+    });
+});
+exports.logOutUser = logOutUser;
 // Get user profile (protected route)
 const getUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
