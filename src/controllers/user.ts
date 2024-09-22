@@ -16,9 +16,9 @@ const createTokenAndSetCookie = (res: Response, userId: string) => {
   // Set the token as a cookie with httpOnly and secure options
   res.cookie("token", token, {
     httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
-    // secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
+    secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
     expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days expiration
-    sameSite: "none", // CSRF protection
+    sameSite: "strict", // CSRF protection
   });
 };
 
