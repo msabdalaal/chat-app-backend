@@ -148,3 +148,41 @@ export const getUserProfile = async (req: Request, res: Response) => {
     });
   }
 };
+
+// Search users by email query (case-insensitive, selecting specific fields)
+export const searchUsers = async (req: Request, res: Response) => {
+  const { query } = req.body;
+
+  try {
+    if (!query) {
+      return res.status(400).json({
+        success: false,
+        message: "Query is required",
+      });
+    }
+
+    // Find users whose email starts with the query string (case-insensitive) and select specific fields
+    const users = await User.find({
+      email: { $regex: `^${query}`, $options: "i" }, // Case-insensitive match
+    }).select("name email _id"); // Only select name, email, and _id
+
+    if (!users || users.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No users found",
+      });
+    }
+
+    // Return the list of matched users with only selected fields
+    res.status(200).json({
+      success: true,
+      data: users,
+    });
+  } catch (error) {
+    console.error("Error searching for users:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};

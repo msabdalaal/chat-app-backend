@@ -4,7 +4,8 @@ import {
   addUserToGroup, 
   removeUserFromGroup, 
   updateGroupDetails, 
-  getGroupChatDetails 
+  getGroupChatDetails, 
+  getGroupChatsForUser
 } from "../controllers/groupChat";
 import { protect } from "../middleware/authMiddleware"; // Middleware to protect routes
 
@@ -24,5 +25,9 @@ groupChatRoutes.patch("/update", protect, updateGroupDetails);
 
 // Get group chat details
 groupChatRoutes.get("/:groupId", protect, getGroupChatDetails);
+
+// Get groups dor user
+groupChatRoutes.get("/userChats", protect, getGroupChatsForUser);
+
 
 export default groupChatRoutes;

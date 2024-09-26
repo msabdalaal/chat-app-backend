@@ -200,3 +200,27 @@ export const getGroupChatDetails = async (req: Request, res: Response) => {
     });
   }
 };
+
+
+// Get group chat details
+export const getGroupChatsForUser = async (req: Request, res: Response) => {
+  const userId = req.user?._id;
+
+  try {
+    const chats = await GroupChat.find({ participants: userId })
+    .populate("participants", "name email") // Populating participants with name and email
+    .populate("lastMessage", "text createdAt sender readBy"); // Populating lastMessage with text, createdAt, and sender
+  
+
+    res.status(200).json({
+      success: true,
+      data: chats,
+    });
+  } catch (error) {
+    console.error("Error fetching chats for user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};

@@ -4,6 +4,7 @@ import {
   loginUser,
   getUserProfile,
   logOutUser,
+  searchUsers,
 } from "../controllers/user";
 import { protect } from "../middleware/authMiddleware";
 
@@ -20,5 +21,8 @@ userRoutes.post("/logout", logOutUser);
 
 // Get user profile (protected route)
 userRoutes.get("/profile", protect, getUserProfile);
+
+// Get user profile (protected route)
+userRoutes.get("/search", protect, searchUsers);
 
 export default userRoutes;
