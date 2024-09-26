@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getGroupChatDetails = exports.updateGroupDetails = exports.removeUserFromGroup = exports.addUserToGroup = exports.createGroupChat = void 0;
+exports.getGroupChatsForUser = exports.getGroupChatDetails = exports.updateGroupDetails = exports.removeUserFromGroup = exports.addUserToGroup = exports.createGroupChat = void 0;
 const groupChat_1 = __importDefault(require("../models/groupChat"));
 const user_1 = __importDefault(require("../models/user"));
 // Create a new group chat
@@ -198,3 +198,25 @@ const getGroupChatDetails = (req, res) => __awaiter(void 0, void 0, void 0, func
     }
 });
 exports.getGroupChatDetails = getGroupChatDetails;
+// Get group chat details
+const getGroupChatsForUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
+    const userId = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id;
+    try {
+        const chats = yield groupChat_1.default.find({ participants: userId })
+            .populate("participants", "name email") // Populating participants with name and email
+            .populate("lastMessage", "text createdAt sender readBy"); // Populating lastMessage with text, createdAt, and sender
+        res.status(200).json({
+            success: true,
+            data: chats,
+        });
+    }
+    catch (error) {
+        console.error("Error fetching chats for user:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+});
+exports.getGroupChatsForUser = getGroupChatsForUser;

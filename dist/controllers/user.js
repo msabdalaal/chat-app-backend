@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getUserProfile = exports.logOutUser = exports.loginUser = exports.registerUser = void 0;
+exports.searchUsers = exports.getUserProfile = exports.logOutUser = exports.loginUser = exports.registerUser = void 0;
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const user_1 = __importDefault(require("../models/user"));
@@ -23,7 +23,6 @@ const JWT_SECRET = process.env.JWT_SECRET || "your_jwt_secret";
 const createTokenAndSetCookie = (res, userId) => {
     // Generate a JWT token that expires in 2 days
     const token = jsonwebtoken_1.default.sign({ id: userId }, JWT_SECRET, { expiresIn: "2d" });
-    console.log(process.env.NODE_ENV);
     // Set the token as a cookie with httpOnly and secure options
     res.cookie("token", token, {
         httpOnly: false, // Prevent client-side JavaScript from accessing the cookie
@@ -154,3 +153,38 @@ const getUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.getUserProfile = getUserProfile;
+// Search users by email query (case-insensitive, selecting specific fields)
+const searchUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { query } = req.body;
+    try {
+        if (!query) {
+            return res.status(400).json({
+                success: false,
+                message: "Query is required",
+            });
+        }
+        // Find users whose email starts with the query string (case-insensitive) and select specific fields
+        const users = yield user_1.default.find({
+            email: { $regex: `^${query}`, $options: "i" }, // Case-insensitive match
+        }).select("name email _id"); // Only select name, email, and _id
+        if (!users || users.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: "No users found",
+            });
+        }
+        // Return the list of matched users with only selected fields
+        res.status(200).json({
+            success: true,
+            data: users,
+        });
+    }
+    catch (error) {
+        console.error("Error searching for users:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+});
+exports.searchUsers = searchUsers;
