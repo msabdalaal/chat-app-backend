@@ -135,6 +135,7 @@ export const deleteMessage = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
+      data:message,
       message: "Message deleted successfully",
     });
   } catch (error) {
