@@ -155,7 +155,7 @@ const getUserProfile = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.getUserProfile = getUserProfile;
 // Search users by email query (case-insensitive, selecting specific fields)
 const searchUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { query } = req.body;
+    const { query } = req.params;
     try {
         if (!query) {
             return res.status(400).json({

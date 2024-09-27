@@ -16,5 +16,5 @@ userRoutes.post("/logout", user_1.logOutUser);
 // Get user profile (protected route)
 userRoutes.get("/profile", authMiddleware_1.protect, user_1.getUserProfile);
 // Get user profile (protected route)
-userRoutes.get("/search", authMiddleware_1.protect, user_1.searchUsers);
+userRoutes.get("/search/:query", authMiddleware_1.protect, user_1.searchUsers);
 exports.default = userRoutes;
