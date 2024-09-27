@@ -18,5 +18,5 @@ groupChatRoutes.patch("/update", authMiddleware_1.protect, groupChat_1.updateGro
 // Get group chat details
 groupChatRoutes.get("/:groupId", authMiddleware_1.protect, groupChat_1.getGroupChatDetails);
 // Get groups dor user
-groupChatRoutes.get("/userChats", authMiddleware_1.protect, groupChat_1.getGroupChatsForUser);
+groupChatRoutes.get("/userChats/all", authMiddleware_1.protect, groupChat_1.getGroupChatsForUser);
 exports.default = groupChatRoutes;
