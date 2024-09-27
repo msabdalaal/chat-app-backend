@@ -23,6 +23,6 @@ userRoutes.post("/logout", logOutUser);
 userRoutes.get("/profile", protect, getUserProfile);
 
 // Get user profile (protected route)
-userRoutes.get("/search", protect, searchUsers);
+userRoutes.get("/search/:query", protect, searchUsers);
 
 export default userRoutes;

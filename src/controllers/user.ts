@@ -151,7 +151,7 @@ export const getUserProfile = async (req: Request, res: Response) => {
 
 // Search users by email query (case-insensitive, selecting specific fields)
 export const searchUsers = async (req: Request, res: Response) => {
-  const { query } = req.body;
+  const { query } = req.params;
 
   try {
     if (!query) {
