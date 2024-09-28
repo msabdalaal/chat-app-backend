@@ -1,11 +1,12 @@
 import express from "express";
-import { 
-  createGroupChat, 
-  addUserToGroup, 
-  removeUserFromGroup, 
-  updateGroupDetails, 
-  getGroupChatDetails, 
-  getGroupChatsForUser
+import {
+  createGroupChat,
+  addUserToGroup,
+  removeUserFromGroup,
+  updateGroupDetails,
+  getGroupChatDetails,
+  getGroupChatsForUser,
+  deleteChat,
 } from "../controllers/groupChat";
 import { protect } from "../middleware/authMiddleware"; // Middleware to protect routes
 
@@ -18,7 +19,10 @@ groupChatRoutes.post("/create", protect, createGroupChat);
 groupChatRoutes.post("/add", protect, addUserToGroup);
 
 // Remove a user from the group chat
-groupChatRoutes.delete("/delete", protect, removeUserFromGroup);
+groupChatRoutes.delete("/deleteUser", protect, removeUserFromGroup);
+
+//Delete group chat
+groupChatRoutes.delete("/delete/:groupID", protect, deleteChat);
 
 // Update group chat details (name, image, etc.)
 groupChatRoutes.patch("/update", protect, updateGroupDetails);
@@ -28,6 +32,5 @@ groupChatRoutes.get("/:groupId", protect, getGroupChatDetails);
 
 // Get groups dor user
 groupChatRoutes.get("/userChats/all", protect, getGroupChatsForUser);
-
 
 export default groupChatRoutes;

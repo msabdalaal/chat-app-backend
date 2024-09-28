@@ -12,7 +12,9 @@ groupChatRoutes.post("/create", authMiddleware_1.protect, groupChat_1.createGrou
 // Add a user to the group chat
 groupChatRoutes.post("/add", authMiddleware_1.protect, groupChat_1.addUserToGroup);
 // Remove a user from the group chat
-groupChatRoutes.delete("/delete", authMiddleware_1.protect, groupChat_1.removeUserFromGroup);
+groupChatRoutes.delete("/deleteUser", authMiddleware_1.protect, groupChat_1.removeUserFromGroup);
+//Delete group chat
+groupChatRoutes.delete("/delete/:groupID", authMiddleware_1.protect, groupChat_1.deleteChat);
 // Update group chat details (name, image, etc.)
 groupChatRoutes.patch("/update", authMiddleware_1.protect, groupChat_1.updateGroupDetails);
 // Get group chat details

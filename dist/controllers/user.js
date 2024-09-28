@@ -164,7 +164,7 @@ const searchUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             });
         }
         // Find users whose email starts with the query string (case-insensitive) and select specific fields
-        const users = yield user_1.default.find({
+        let users = yield user_1.default.find({
             email: { $regex: `^${query}`, $options: "i" }, // Case-insensitive match
         }).select("name email _id"); // Only select name, email, and _id
         if (!users || users.length === 0) {
@@ -173,6 +173,8 @@ const searchUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
                 message: "No users found",
             });
         }
+        //exclude the user himself
+        users = users.filter((user) => { var _a; return user._id != ((_a = req.user) === null || _a === void 0 ? void 0 : _a._id); });
         // Return the list of matched users with only selected fields
         res.status(200).json({
             success: true,

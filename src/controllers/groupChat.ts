@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import GroupChat from "../models/groupChat";
 import User from "../models/user";
+import Message from "../models/message";
 
 // Create a new group chat
 export const createGroupChat = async (req: Request, res: Response) => {
@@ -221,6 +222,32 @@ export const getGroupChatsForUser = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error fetching chats for user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+
+// Delete chat
+export const deleteChat = async (req: Request, res: Response) => {
+  const { groupID } = req.params;
+  try {
+    const deletedChat = await GroupChat.findByIdAndDelete(groupID);
+    if (!deletedChat) {
+      return res.status(404).json({
+        success: false,
+        message: "Couldn't find chat",
+      });
+    }
+    const deletedMessages = await Message.deleteMany({chatId : groupID});
+    res.status(200).json({
+      success: true,
+      data: deletedChat,
+    });
+  } catch (error) {
+    console.error("Error Deleting Chat:", error);
     res.status(500).json({
       success: false,
       message: "Server error",

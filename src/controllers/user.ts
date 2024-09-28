@@ -162,7 +162,7 @@ export const searchUsers = async (req: Request, res: Response) => {
     }
 
     // Find users whose email starts with the query string (case-insensitive) and select specific fields
-    const users = await User.find({
+    let users = await User.find({
       email: { $regex: `^${query}`, $options: "i" }, // Case-insensitive match
     }).select("name email _id"); // Only select name, email, and _id
 
@@ -173,6 +173,8 @@ export const searchUsers = async (req: Request, res: Response) => {
       });
     }
 
+    //exclude the user himself
+    users = users.filter((user) => user._id != req.user?._id);
     // Return the list of matched users with only selected fields
     res.status(200).json({
       success: true,

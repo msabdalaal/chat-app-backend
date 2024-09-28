@@ -12,9 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getGroupChatsForUser = exports.getGroupChatDetails = exports.updateGroupDetails = exports.removeUserFromGroup = exports.addUserToGroup = exports.createGroupChat = void 0;
+exports.deleteChat = exports.getGroupChatsForUser = exports.getGroupChatDetails = exports.updateGroupDetails = exports.removeUserFromGroup = exports.addUserToGroup = exports.createGroupChat = void 0;
 const groupChat_1 = __importDefault(require("../models/groupChat"));
 const user_1 = __importDefault(require("../models/user"));
+const message_1 = __importDefault(require("../models/message"));
 // Create a new group chat
 const createGroupChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
@@ -223,3 +224,29 @@ const getGroupChatsForUser = (req, res) => __awaiter(void 0, void 0, void 0, fun
     }
 });
 exports.getGroupChatsForUser = getGroupChatsForUser;
+// Delete chat
+const deleteChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { groupID } = req.params;
+    try {
+        const deletedChat = yield groupChat_1.default.findByIdAndDelete(groupID);
+        if (!deletedChat) {
+            return res.status(404).json({
+                success: false,
+                message: "Couldn't find chat",
+            });
+        }
+        const deletedMessages = yield message_1.default.deleteMany({ chatId: groupID });
+        res.status(200).json({
+            success: true,
+            data: deletedChat,
+        });
+    }
+    catch (error) {
+        console.error("Error Deleting Chat:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+});
+exports.deleteChat = deleteChat;

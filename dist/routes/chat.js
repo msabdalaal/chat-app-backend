@@ -9,6 +9,8 @@ const authMiddleware_1 = require("../middleware/authMiddleware"); // Protect rou
 const chatRoutes = express_1.default.Router();
 // Create a new chat
 chatRoutes.post("/create", authMiddleware_1.protect, chat_1.createChat);
+// Delete a new chat
+chatRoutes.delete("/delete/:chatID", authMiddleware_1.protect, chat_1.deleteChat);
 // Get all chats for a specific user
 chatRoutes.get("/userChats", authMiddleware_1.protect, chat_1.getChatsForUser);
 exports.default = chatRoutes;

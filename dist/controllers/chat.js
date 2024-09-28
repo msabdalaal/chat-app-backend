@@ -12,9 +12,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getChatsForUser = exports.createChat = void 0;
+exports.deleteChat = exports.getChatsForUser = exports.createChat = void 0;
 const chat_1 = __importDefault(require("../models/chat")); // Assuming the Chat model exists
 const user_1 = __importDefault(require("../models/user")); // Assuming the User model exists
+const message_1 = __importDefault(require("../models/message"));
 // Create a new chat between users
 const createChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
@@ -71,3 +72,29 @@ const getChatsForUser = (req, res) => __awaiter(void 0, void 0, void 0, function
     }
 });
 exports.getChatsForUser = getChatsForUser;
+// Delete chat
+const deleteChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { chatID } = req.params;
+    try {
+        const deletedChat = yield chat_1.default.findByIdAndDelete(chatID);
+        if (!deletedChat) {
+            return res.status(404).json({
+                success: false,
+                message: "Couldn't find chat",
+            });
+        }
+        const deletedMessages = yield message_1.default.deleteMany({ chatId: chatID });
+        res.status(200).json({
+            success: true,
+            data: deletedChat,
+        });
+    }
+    catch (error) {
+        console.error("Error Deleting Chat:", error);
+        res.status(500).json({
+            success: false,
+            message: "Server error",
+        });
+    }
+});
+exports.deleteChat = deleteChat;

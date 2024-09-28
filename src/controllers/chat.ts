@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import Chat from "../models/chat"; // Assuming the Chat model exists
 import User from "../models/user"; // Assuming the User model exists
+import Message from "../models/message";
 
 // Create a new chat between users
 export const createChat = async (req: Request, res: Response) => {
@@ -24,8 +25,8 @@ export const createChat = async (req: Request, res: Response) => {
 
     // Save the chat to the database
     await chat.save();
-    chat = await chat.populate("participants", "name email")
-    
+    chat = await chat.populate("participants", "name email");
+
     res.status(201).json({
       success: true,
       data: chat, // Populating participants with name and email
@@ -54,6 +55,31 @@ export const getChatsForUser = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Error fetching chats for user:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+  }
+};
+
+// Delete chat
+export const deleteChat = async (req: Request, res: Response) => {
+  const { chatID } = req.params;
+  try {
+    const deletedChat = await Chat.findByIdAndDelete(chatID);
+    if (!deletedChat) {
+      return res.status(404).json({
+        success: false,
+        message: "Couldn't find chat",
+      });
+    }
+    const deletedMessages = await Message.deleteMany({chatId : chatID});
+    res.status(200).json({
+      success: true,
+      data: deletedChat,
+    });
+  } catch (error) {
+    console.error("Error Deleting Chat:", error);
     res.status(500).json({
       success: false,
       message: "Server error",
