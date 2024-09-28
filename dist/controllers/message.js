@@ -53,7 +53,7 @@ const createMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
             });
         }
         // Create a new message
-        const message = new message_1.default({
+        let message = new message_1.default({
             chatId,
             sender: (_a = req.user) === null || _a === void 0 ? void 0 : _a._id,
             text,
@@ -61,6 +61,7 @@ const createMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         });
         // Save the message to the database
         yield message.save();
+        message = yield message.populate("sender", "_id name email");
         // Notify all participants except the sender
         const chatObjectId = new mongoose_1.default.Types.ObjectId(chatId);
         const userObjectId = new mongoose_1.default.Types.ObjectId((_d = (_c = req.user) === null || _c === void 0 ? void 0 : _c._id) === null || _d === void 0 ? void 0 : _d.toString());

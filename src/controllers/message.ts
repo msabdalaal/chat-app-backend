@@ -46,7 +46,7 @@ export const createMessage = async (req: Request, res: Response) => {
     }
 
     // Create a new message
-    const message = new Message({
+    let message = new Message({
       chatId,
       sender: req.user?._id,
       text,
@@ -55,7 +55,7 @@ export const createMessage = async (req: Request, res: Response) => {
 
     // Save the message to the database
     await message.save();
-
+    message = await message.populate("sender", "_id name email");
     // Notify all participants except the sender
     const chatObjectId = new mongoose.Types.ObjectId(chatId);
     const userObjectId = new mongoose.Types.ObjectId(req.user?._id?.toString());
