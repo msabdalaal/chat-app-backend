@@ -174,7 +174,7 @@ const searchUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
             });
         }
         //exclude the user himself
-        users = users.filter((user) => { var _a; return user._id != ((_a = req.user) === null || _a === void 0 ? void 0 : _a._id); });
+        users = users.filter((user) => { var _a; return user._id != ((_a = req.user) === null || _a === void 0 ? void 0 : _a.id); });
         // Return the list of matched users with only selected fields
         res.status(200).json({
             success: true,

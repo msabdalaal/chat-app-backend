@@ -174,7 +174,7 @@ export const searchUsers = async (req: Request, res: Response) => {
     }
 
     //exclude the user himself
-    users = users.filter((user) => user._id != req.user?._id);
+    users = users.filter((user) => user._id != req.user?.id);
     // Return the list of matched users with only selected fields
     res.status(200).json({
       success: true,
