@@ -4,7 +4,12 @@ import { IChat } from "../types";
 const chatSchema: Schema<IChat> = new mongoose.Schema(
   {
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: "User" }],
-    lastMessage: { type: mongoose.Schema.Types.ObjectId, ref: "Message" },
+    lastMessage: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Message",
+      required: true,
+      default: null,
+    },
   },
   { timestamps: true }
 );
