@@ -18,16 +18,17 @@ export const createChat = async (req: Request, res: Response) => {
     }
 
     // Create a new chat
-    const chat = new Chat({
+    let chat = new Chat({
       participants: [...participants, req.user?._id],
     });
 
     // Save the chat to the database
     await chat.save();
-
+    chat = await chat.populate("participants", "name email")
+    
     res.status(201).json({
       success: true,
-      data: chat,
+      data: chat, // Populating participants with name and email
     });
   } catch (error) {
     console.error("Error creating chat:", error);
@@ -44,9 +45,8 @@ export const getChatsForUser = async (req: Request, res: Response) => {
 
   try {
     const chats = await Chat.find({ participants: userId })
-    .populate("participants", "name email") // Populating participants with name and email
-    .populate("lastMessage", "text createdAt sender readBy"); // Populating lastMessage with text, createdAt, and sender
-  
+      .populate("participants", "name email") // Populating participants with name and email
+      .populate("lastMessage", "text createdAt sender readBy"); // Populating lastMessage with text, createdAt, and sender
 
     res.status(200).json({
       success: true,

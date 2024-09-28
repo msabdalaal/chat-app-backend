@@ -29,7 +29,7 @@ const createGroupChat = (req, res) => __awaiter(void 0, void 0, void 0, function
             });
         }
         // Create a new group chat
-        const groupChat = new groupChat_1.default({
+        let groupChat = new groupChat_1.default({
             participants: [...participants, (_a = req.user) === null || _a === void 0 ? void 0 : _a._id], // Add current user as admin to participants
             admin: (_b = req.user) === null || _b === void 0 ? void 0 : _b._id,
             groupName,
@@ -37,6 +37,7 @@ const createGroupChat = (req, res) => __awaiter(void 0, void 0, void 0, function
         });
         // Save the group chat
         yield groupChat.save();
+        groupChat = yield groupChat.populate("participants", "name email");
         res.status(201).json({
             success: true,
             data: groupChat,
@@ -177,7 +178,9 @@ exports.updateGroupDetails = updateGroupDetails;
 const getGroupChatDetails = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { groupId } = req.params;
     try {
-        const groupChat = yield groupChat_1.default.findById(groupId).populate("participants", "name email").populate("admin", "name email");
+        const groupChat = yield groupChat_1.default.findById(groupId)
+            .populate("participants", "name email")
+            .populate("admin", "name email");
         if (!groupChat) {
             return res.status(404).json({
                 success: false,

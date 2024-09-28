@@ -17,7 +17,7 @@ export const createGroupChat = async (req: Request, res: Response) => {
     }
 
     // Create a new group chat
-    const groupChat = new GroupChat({
+    let groupChat = new GroupChat({
       participants: [...participants, req.user?._id], // Add current user as admin to participants
       admin: req.user?._id,
       groupName,
@@ -26,6 +26,7 @@ export const createGroupChat = async (req: Request, res: Response) => {
 
     // Save the group chat
     await groupChat.save();
+    groupChat = await groupChat.populate("participants", "name email");
 
     res.status(201).json({
       success: true,
@@ -118,7 +119,9 @@ export const removeUserFromGroup = async (req: Request, res: Response) => {
     }
 
     // Remove the user from the group
-    groupChat.participants = groupChat.participants.filter((id) => !id.equals(userId));
+    groupChat.participants = groupChat.participants.filter(
+      (id) => !id.equals(userId)
+    );
     await groupChat.save();
 
     res.status(200).json({
@@ -179,7 +182,9 @@ export const getGroupChatDetails = async (req: Request, res: Response) => {
   const { groupId } = req.params;
 
   try {
-    const groupChat = await GroupChat.findById(groupId).populate("participants", "name email").populate("admin", "name email");
+    const groupChat = await GroupChat.findById(groupId)
+      .populate("participants", "name email")
+      .populate("admin", "name email");
 
     if (!groupChat) {
       return res.status(404).json({
@@ -201,16 +206,14 @@ export const getGroupChatDetails = async (req: Request, res: Response) => {
   }
 };
 
-
 // Get group chat details
 export const getGroupChatsForUser = async (req: Request, res: Response) => {
   const userId = req.user?._id;
 
   try {
     const chats = await GroupChat.find({ participants: userId })
-    .populate("participants", "name email") // Populating participants with name and email
-    .populate("lastMessage", "text createdAt sender readBy"); // Populating lastMessage with text, createdAt, and sender
-  
+      .populate("participants", "name email") // Populating participants with name and email
+      .populate("lastMessage", "text createdAt sender readBy"); // Populating lastMessage with text, createdAt, and sender
 
     res.status(200).json({
       success: true,

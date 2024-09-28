@@ -29,14 +29,15 @@ const createChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             });
         }
         // Create a new chat
-        const chat = new chat_1.default({
+        let chat = new chat_1.default({
             participants: [...participants, (_a = req.user) === null || _a === void 0 ? void 0 : _a._id],
         });
         // Save the chat to the database
         yield chat.save();
+        chat = yield chat.populate("participants", "name email");
         res.status(201).json({
             success: true,
-            data: chat,
+            data: chat, // Populating participants with name and email
         });
     }
     catch (error) {
