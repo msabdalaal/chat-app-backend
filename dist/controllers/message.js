@@ -17,6 +17,7 @@ const message_1 = __importDefault(require("../models/message"));
 const chat_1 = __importDefault(require("../models/chat"));
 const mongoose_1 = __importDefault(require("mongoose")); // Import mongoose for ObjectId type
 const notification_1 = require("./notification");
+const groupChat_1 = __importDefault(require("../models/groupChat"));
 // Get all messages for a specific chat
 const getMessagesForChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { chatId } = req.params;
@@ -36,14 +37,16 @@ const getMessagesForChat = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
 });
 exports.getMessagesForChat = getMessagesForChat;
-// Create a message and add it to an existing chat
 const createMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b, _c, _d;
     const { chatId } = req.params;
     const { text } = req.body;
     try {
         const chat = yield chat_1.default.findById(chatId);
-        if (!chat) {
+        const groupChat = yield groupChat_1.default.findById(chatId);
+        const currentChat = chat ? chat : groupChat;
+        // Check if chat exists
+        if (!currentChat) {
             return res.status(404).json({
                 success: false,
                 message: "Chat not found",
@@ -61,14 +64,14 @@ const createMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         // Notify all participants except the sender
         const chatObjectId = new mongoose_1.default.Types.ObjectId(chatId);
         const userObjectId = new mongoose_1.default.Types.ObjectId((_d = (_c = req.user) === null || _c === void 0 ? void 0 : _c._id) === null || _d === void 0 ? void 0 : _d.toString());
-        chat.participants.forEach((participant) => {
+        currentChat.participants.forEach((participant) => {
             if (!participant.equals(userObjectId)) {
                 (0, notification_1.createNotification)(participant, message.id, chatObjectId);
             }
         });
         // Update the last message in the chat
-        chat.lastMessage = message.id;
-        yield chat.save();
+        currentChat.lastMessage = message.id;
+        yield currentChat.save();
         res.status(201).json({
             success: true,
             data: message,

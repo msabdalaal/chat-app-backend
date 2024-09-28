@@ -3,6 +3,7 @@ import Message from "../models/message";
 import Chat from "../models/chat";
 import mongoose from "mongoose"; // Import mongoose for ObjectId type
 import { createNotification } from "./notification";
+import GroupChat from "../models/groupChat";
 
 // Get all messages for a specific chat
 export const getMessagesForChat = async (req: Request, res: Response) => {
@@ -27,15 +28,17 @@ export const getMessagesForChat = async (req: Request, res: Response) => {
   }
 };
 
-// Create a message and add it to an existing chat
 export const createMessage = async (req: Request, res: Response) => {
   const { chatId } = req.params;
   const { text } = req.body;
 
   try {
     const chat = await Chat.findById(chatId);
+    const groupChat = await GroupChat.findById(chatId);
+    const currentChat = chat ? chat : groupChat;
 
-    if (!chat) {
+    // Check if chat exists
+    if (!currentChat) {
       return res.status(404).json({
         success: false,
         message: "Chat not found",
@@ -54,17 +57,17 @@ export const createMessage = async (req: Request, res: Response) => {
     await message.save();
 
     // Notify all participants except the sender
-    const chatObjectId= new mongoose.Types.ObjectId(chatId)
-    const userObjectId= new mongoose.Types.ObjectId(req.user?._id?.toString())
-    chat.participants.forEach((participant) => {
+    const chatObjectId = new mongoose.Types.ObjectId(chatId);
+    const userObjectId = new mongoose.Types.ObjectId(req.user?._id?.toString());
+    currentChat.participants.forEach((participant: any) => {
       if (!participant.equals(userObjectId)) {
         createNotification(participant, message.id, chatObjectId);
       }
     });
 
     // Update the last message in the chat
-    chat.lastMessage = message.id;
-    await chat.save();
+    currentChat.lastMessage = message.id;
+    await currentChat.save();
 
     res.status(201).json({
       success: true,
@@ -135,7 +138,7 @@ export const deleteMessage = async (req: Request, res: Response) => {
 
     res.status(200).json({
       success: true,
-      data:message,
+      data: message,
       message: "Message deleted successfully",
     });
   } catch (error) {
