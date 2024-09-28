@@ -7,7 +7,6 @@ const chatSchema: Schema<IChat> = new mongoose.Schema(
     lastMessage: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message",
-      required: true,
       default: null,
     },
   },

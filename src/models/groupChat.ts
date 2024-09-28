@@ -14,7 +14,6 @@ const groupChatSchema: Schema<IGroupChat> = new mongoose.Schema(
     lastMessage: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Message",
-      required: true,
       default: null,
     },
   },

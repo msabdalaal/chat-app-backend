@@ -16,7 +16,6 @@ const groupChatSchema = new mongoose_1.default.Schema({
     lastMessage: {
         type: mongoose_1.default.Schema.Types.ObjectId,
         ref: "Message",
-        required: true,
         default: null,
     },
 }, { timestamps: true });
