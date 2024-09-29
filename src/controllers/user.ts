@@ -15,7 +15,7 @@ const createTokenAndSetCookie = (res: Response, userId: string) => {
 
   // Set the token as a cookie with httpOnly and secure options
   res.cookie("token", token, {
-    httpOnly: false, // Prevent client-side JavaScript from accessing the cookie
+    httpOnly: true, // Prevent client-side JavaScript from accessing the cookie
     secure: process.env.NODE_ENV === "production", // Only use secure cookies in production
     expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 days expiration
     sameSite: process.env.NODE_ENV === "production" ? "none" : "lax", // Set sameSite to none in production, lax in development
