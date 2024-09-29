@@ -127,12 +127,36 @@ exports.markAllMessagesAsRead = markAllMessagesAsRead;
 const deleteMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { messageId } = req.params;
     try {
+        // Find and delete the message
         const message = yield message_1.default.findByIdAndDelete(messageId);
         if (!message) {
             return res.status(404).json({
                 success: false,
                 message: "Message not found",
             });
+        }
+        // Find the chat that contains this message
+        const chat = yield chat_1.default.findById(message.chatId);
+        const groupChat = yield groupChat_1.default.findById(message.chatId);
+        const currentChat = chat ? chat : groupChat;
+        // Check if chat exists
+        if (!currentChat) {
+            return res.status(404).json({
+                success: false,
+                message: "Chat not found",
+            });
+        }
+        // Check if the deleted message was the last message in the chat
+        if (currentChat.lastMessage &&
+            currentChat.lastMessage.toString() === message.id.toString()) {
+            // Find the most recent message before the deleted one
+            const previousMessage = yield message_1.default.findOne({
+                chatId: currentChat._id,
+                _id: { $lt: message._id }, // Find the message with an ID less than the deleted one
+            }).sort({ _id: -1 }); // Sort by ID in descending order to get the most recent one
+            // Update the lastMessage field in the chat document
+            currentChat.lastMessage = previousMessage ? previousMessage.id : null;
+            yield currentChat.save();
         }
         res.status(200).json({
             success: true,

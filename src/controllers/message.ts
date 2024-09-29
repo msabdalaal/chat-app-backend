@@ -127,6 +127,7 @@ export const deleteMessage = async (req: Request, res: Response) => {
   const { messageId } = req.params;
 
   try {
+    // Find and delete the message
     const message = await Message.findByIdAndDelete(messageId);
 
     if (!message) {
@@ -134,6 +135,35 @@ export const deleteMessage = async (req: Request, res: Response) => {
         success: false,
         message: "Message not found",
       });
+    }
+
+    // Find the chat that contains this message
+    const chat = await Chat.findById(message.chatId);
+    const groupChat = await GroupChat.findById(message.chatId);
+    const currentChat = chat ? chat : groupChat;
+
+    // Check if chat exists
+    if (!currentChat) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found",
+      });
+    }
+
+    // Check if the deleted message was the last message in the chat
+    if (
+      currentChat.lastMessage &&
+      currentChat.lastMessage.toString() === message.id.toString()
+    ) {
+      // Find the most recent message before the deleted one
+      const previousMessage = await Message.findOne({
+        chatId: currentChat._id,
+        _id: { $lt: message._id }, // Find the message with an ID less than the deleted one
+      }).sort({ _id: -1 }); // Sort by ID in descending order to get the most recent one
+
+      // Update the lastMessage field in the chat document
+      currentChat.lastMessage = previousMessage ? previousMessage.id : null;
+      await currentChat.save();
     }
 
     res.status(200).json({
