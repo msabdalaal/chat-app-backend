@@ -1,5 +1,8 @@
 import mongoose, { Document } from "mongoose";
 
+export interface IUserSocketMap {
+  [key: string]: string | undefined;
+}
 export interface IUser extends Document {
   name: string;
   email: string;
@@ -31,7 +34,6 @@ export interface INotification extends Document {
   createdAt: Date;
 }
 
-
 export interface IPresence extends Document {
   userId: mongoose.Types.ObjectId;
   isOnline: boolean;
@@ -45,5 +47,4 @@ export interface IGroupChat extends Document {
   groupImage: string;
   lastMessage: mongoose.Types.ObjectId;
   isGroup: boolean;
-
 }

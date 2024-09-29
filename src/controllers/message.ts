@@ -4,6 +4,7 @@ import Chat from "../models/chat";
 import mongoose from "mongoose"; // Import mongoose for ObjectId type
 import { createNotification } from "./notification";
 import GroupChat from "../models/groupChat";
+import { getReceiverSocketId, io } from "../socket/socket";
 
 // Get all messages for a specific chat
 export const getMessagesForChat = async (req: Request, res: Response) => {
@@ -69,6 +70,18 @@ export const createMessage = async (req: Request, res: Response) => {
     currentChat.lastMessage = message.id;
     await currentChat.save();
 
+    // Sending Messages to users
+    const receiverSocketIds = currentChat.participants.map((user) => {
+      const Id = getReceiverSocketId?.(user.toString()) ?? "";
+      return Id;
+    });
+    if (receiverSocketIds) {
+      receiverSocketIds
+        .filter((ID) => ID != getReceiverSocketId(req.user?._id?.toString() || ""))
+        .forEach((ID) => {
+          io.to(ID!).emit("newMessage", message);
+        });
+    }
     res.status(201).json({
       success: true,
       data: message,
@@ -183,7 +196,7 @@ export const deleteMessage = async (req: Request, res: Response) => {
 export async function deleteAllMessagesForChat(req: Request, res: Response) {
   const { chatID } = req.params;
   try {
-    const messages = await Message.deleteMany({chatId:chatID})
+    const messages = await Message.deleteMany({ chatId: chatID });
     if (messages.deletedCount === 0) {
       return res.status(404).json({
         success: false,
@@ -200,6 +213,5 @@ export async function deleteAllMessagesForChat(req: Request, res: Response) {
       success: false,
       message: "Server error",
     });
-    
   }
 }

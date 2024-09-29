@@ -19,6 +19,7 @@ const chat_1 = __importDefault(require("../models/chat"));
 const mongoose_1 = __importDefault(require("mongoose")); // Import mongoose for ObjectId type
 const notification_1 = require("./notification");
 const groupChat_1 = __importDefault(require("../models/groupChat"));
+const socket_1 = require("../socket/socket");
 // Get all messages for a specific chat
 const getMessagesForChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { chatId } = req.params;
@@ -74,6 +75,19 @@ const createMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         // Update the last message in the chat
         currentChat.lastMessage = message.id;
         yield currentChat.save();
+        // Sending Messages to users
+        const receiverSocketIds = currentChat.participants.map((user) => {
+            var _a;
+            const Id = (_a = socket_1.getReceiverSocketId === null || socket_1.getReceiverSocketId === void 0 ? void 0 : (0, socket_1.getReceiverSocketId)(user.toString())) !== null && _a !== void 0 ? _a : "";
+            return Id;
+        });
+        if (receiverSocketIds) {
+            receiverSocketIds
+                .filter((ID) => { var _a, _b; return ID != (0, socket_1.getReceiverSocketId)(((_b = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id) === null || _b === void 0 ? void 0 : _b.toString()) || ""); })
+                .forEach((ID) => {
+                socket_1.io.to(ID).emit("newMessage", message);
+            });
+        }
         res.status(201).json({
             success: true,
             data: message,
