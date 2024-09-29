@@ -9,6 +9,10 @@ const chatSchema: Schema<IChat> = new mongoose.Schema(
       ref: "Message",
       default: null,
     },
+    isGroup: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );

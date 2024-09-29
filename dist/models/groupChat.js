@@ -18,6 +18,10 @@ const groupChatSchema = new mongoose_1.default.Schema({
         ref: "Message",
         default: null,
     },
+    isGroup: {
+        type: Boolean,
+        default: true,
+    },
 }, { timestamps: true });
 const GroupChat = mongoose_1.default.model("GroupChat", groupChatSchema);
 exports.default = GroupChat;

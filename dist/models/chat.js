@@ -11,6 +11,10 @@ const chatSchema = new mongoose_1.default.Schema({
         ref: "Message",
         default: null,
     },
+    isGroup: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true });
 const Chat = mongoose_1.default.model("Chat", chatSchema);
 exports.default = Chat;

@@ -20,6 +20,7 @@ export interface IChat extends Document {
   participants: mongoose.Types.ObjectId[]; // Users involved in the chat
   lastMessage: mongoose.Types.ObjectId; // Reference to the last message
   updatedAt: Date;
+  isGroup: boolean;
 }
 
 export interface INotification extends Document {
@@ -43,4 +44,6 @@ export interface IGroupChat extends Document {
   groupName: string;
   groupImage: string;
   lastMessage: mongoose.Types.ObjectId;
+  isGroup: boolean;
+
 }

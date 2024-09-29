@@ -16,6 +16,10 @@ const groupChatSchema: Schema<IGroupChat> = new mongoose.Schema(
       ref: "Message",
       default: null,
     },
+    isGroup: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true }
 );
