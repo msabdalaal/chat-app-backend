@@ -10,9 +10,9 @@ const groupChatRoutes = express_1.default.Router();
 // Create a new group chat
 groupChatRoutes.post("/create", authMiddleware_1.protect, groupChat_1.createGroupChat);
 // Add a user to the group chat
-groupChatRoutes.post("/add", authMiddleware_1.protect, groupChat_1.addUserToGroup);
+groupChatRoutes.post("/add/:groupID", authMiddleware_1.protect, groupChat_1.addUserToGroup);
 // Remove a user from the group chat
-groupChatRoutes.delete("/deleteUser", authMiddleware_1.protect, groupChat_1.removeUserFromGroup);
+groupChatRoutes.delete("/deleteUser/:groupID", authMiddleware_1.protect, groupChat_1.removeUserFromGroup);
 //Delete group chat
 groupChatRoutes.delete("/delete/:groupID", authMiddleware_1.protect, groupChat_1.deleteChat);
 // Update group chat details (name, image, etc.)

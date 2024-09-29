@@ -179,3 +179,27 @@ export const deleteMessage = async (req: Request, res: Response) => {
     });
   }
 };
+
+export async function deleteAllMessagesForChat(req: Request, res: Response) {
+  const { chatID } = req.params;
+  try {
+    const messages = await Message.deleteMany({chatId:chatID})
+    if (messages.deletedCount === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No messages found for this chat",
+      });
+    }
+    res.status(200).json({
+      success: true,
+      message: `${messages.deletedCount} messages deleted successfully`,
+    });
+  } catch (error) {
+    console.error("Error deleting messages for chat:", error);
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+    });
+    
+  }
+}

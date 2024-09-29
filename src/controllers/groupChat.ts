@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import GroupChat from "../models/groupChat";
 import User from "../models/user";
 import Message from "../models/message";
+import mongoose from "mongoose";
 
 // Create a new group chat
 export const createGroupChat = async (req: Request, res: Response) => {
@@ -44,12 +45,13 @@ export const createGroupChat = async (req: Request, res: Response) => {
 
 // Add a user to the group chat
 export const addUserToGroup = async (req: Request, res: Response) => {
-  const { groupId, userId } = req.body;
-
+  const { userId } = req.body;
+  const { groupID } = req.params;
+  console.log(userId, groupID);
   try {
     // Find the group chat and ensure the requester is the admin
-    const groupChat = await GroupChat.findById(groupId);
-
+    let groupChat = await GroupChat.findById(groupID);
+    console.log(groupChat);
     if (!groupChat) {
       return res.status(404).json({
         success: false,
@@ -75,7 +77,7 @@ export const addUserToGroup = async (req: Request, res: Response) => {
     // Add the user to the group
     groupChat.participants.push(userId);
     await groupChat.save();
-
+    groupChat = await groupChat.populate("participants", "name email _id");
     res.status(200).json({
       success: true,
       data: groupChat,
@@ -91,11 +93,12 @@ export const addUserToGroup = async (req: Request, res: Response) => {
 
 // Remove a user from the group chat
 export const removeUserFromGroup = async (req: Request, res: Response) => {
-  const { groupId, userId } = req.body;
+  const { userId } = req.body;
+  const { groupID } = req.params;
 
   try {
     // Find the group chat and ensure the requester is the admin
-    const groupChat = await GroupChat.findById(groupId);
+    let groupChat = await GroupChat.findById(groupID);
 
     if (!groupChat) {
       return res.status(404).json({
@@ -124,6 +127,17 @@ export const removeUserFromGroup = async (req: Request, res: Response) => {
       (id) => !id.equals(userId)
     );
     await groupChat.save();
+
+    // Populate both participants and lastMessage
+    groupChat = await (
+      await groupChat.populate({
+        path: "participants",
+        select: "name _id email",
+      })
+    ).populate({
+      path: "lastMessage",
+      select: "text createdAt sender readBy",
+    });
 
     res.status(200).json({
       success: true,
@@ -229,7 +243,6 @@ export const getGroupChatsForUser = async (req: Request, res: Response) => {
   }
 };
 
-
 // Delete chat
 export const deleteChat = async (req: Request, res: Response) => {
   const { groupID } = req.params;
@@ -241,7 +254,7 @@ export const deleteChat = async (req: Request, res: Response) => {
         message: "Couldn't find chat",
       });
     }
-    const deletedMessages = await Message.deleteMany({chatId : groupID});
+    const deletedMessages = await Message.deleteMany({ chatId: groupID });
     res.status(200).json({
       success: true,
       data: deletedChat,

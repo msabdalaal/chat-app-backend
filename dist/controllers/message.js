@@ -13,6 +13,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteMessage = exports.markAllMessagesAsRead = exports.createMessage = exports.getMessagesForChat = void 0;
+exports.deleteAllMessagesForChat = deleteAllMessagesForChat;
 const message_1 = __importDefault(require("../models/message"));
 const chat_1 = __importDefault(require("../models/chat"));
 const mongoose_1 = __importDefault(require("mongoose")); // Import mongoose for ObjectId type
@@ -173,3 +174,28 @@ const deleteMessage = (req, res) => __awaiter(void 0, void 0, void 0, function* 
     }
 });
 exports.deleteMessage = deleteMessage;
+function deleteAllMessagesForChat(req, res) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const { chatID } = req.params;
+        try {
+            const messages = yield message_1.default.deleteMany({ chatId: chatID });
+            if (messages.deletedCount === 0) {
+                return res.status(404).json({
+                    success: false,
+                    message: "No messages found for this chat",
+                });
+            }
+            res.status(200).json({
+                success: true,
+                message: `${messages.deletedCount} messages deleted successfully`,
+            });
+        }
+        catch (error) {
+            console.error("Error deleting messages for chat:", error);
+            res.status(500).json({
+                success: false,
+                message: "Server error",
+            });
+        }
+    });
+}

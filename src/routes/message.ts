@@ -1,5 +1,5 @@
 import express from "express";
-import { getMessagesForChat, deleteMessage, createMessage, markAllMessagesAsRead } from "../controllers/message";
+import { getMessagesForChat, deleteMessage, createMessage, markAllMessagesAsRead, deleteAllMessagesForChat } from "../controllers/message";
 import { protect } from "../middleware/authMiddleware";
 
 const messageRoutes = express.Router();
@@ -15,5 +15,6 @@ messageRoutes.patch("/read/:chatId", protect, markAllMessagesAsRead);
 
 // Delete a specific message
 messageRoutes.delete("/delete/:messageId", protect, deleteMessage);
+messageRoutes.delete("/deleteAll/:chatID", protect, deleteAllMessagesForChat);
 
 export default messageRoutes;

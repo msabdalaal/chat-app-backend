@@ -56,10 +56,13 @@ exports.createGroupChat = createGroupChat;
 // Add a user to the group chat
 const addUserToGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
-    const { groupId, userId } = req.body;
+    const { userId } = req.body;
+    const { groupID } = req.params;
+    console.log(userId, groupID);
     try {
         // Find the group chat and ensure the requester is the admin
-        const groupChat = yield groupChat_1.default.findById(groupId);
+        let groupChat = yield groupChat_1.default.findById(groupID);
+        console.log(groupChat);
         if (!groupChat) {
             return res.status(404).json({
                 success: false,
@@ -82,6 +85,7 @@ const addUserToGroup = (req, res) => __awaiter(void 0, void 0, void 0, function*
         // Add the user to the group
         groupChat.participants.push(userId);
         yield groupChat.save();
+        groupChat = yield groupChat.populate("participants", "name email _id");
         res.status(200).json({
             success: true,
             data: groupChat,
@@ -99,10 +103,11 @@ exports.addUserToGroup = addUserToGroup;
 // Remove a user from the group chat
 const removeUserFromGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
-    const { groupId, userId } = req.body;
+    const { userId } = req.body;
+    const { groupID } = req.params;
     try {
         // Find the group chat and ensure the requester is the admin
-        const groupChat = yield groupChat_1.default.findById(groupId);
+        let groupChat = yield groupChat_1.default.findById(groupID);
         if (!groupChat) {
             return res.status(404).json({
                 success: false,
@@ -125,6 +130,14 @@ const removeUserFromGroup = (req, res) => __awaiter(void 0, void 0, void 0, func
         // Remove the user from the group
         groupChat.participants = groupChat.participants.filter((id) => !id.equals(userId));
         yield groupChat.save();
+        // Populate both participants and lastMessage
+        groupChat = yield (yield groupChat.populate({
+            path: "participants",
+            select: "name _id email",
+        })).populate({
+            path: "lastMessage",
+            select: "text createdAt sender readBy",
+        });
         res.status(200).json({
             success: true,
             data: groupChat,

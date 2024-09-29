@@ -15,4 +15,5 @@ messageRoutes.post("/:chatId", authMiddleware_1.protect, message_1.createMessage
 messageRoutes.patch("/read/:chatId", authMiddleware_1.protect, message_1.markAllMessagesAsRead);
 // Delete a specific message
 messageRoutes.delete("/delete/:messageId", authMiddleware_1.protect, message_1.deleteMessage);
+messageRoutes.delete("/deleteAll/:chatID", authMiddleware_1.protect, message_1.deleteAllMessagesForChat);
 exports.default = messageRoutes;
