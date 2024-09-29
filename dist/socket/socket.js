@@ -15,7 +15,7 @@ exports.server = server;
 const io = new socket_io_1.Server(server, {
     cors: {
         origin: ((_a = process.env.CORS_ORIGIN) === null || _a === void 0 ? void 0 : _a.split(",")) || "*",
-        methods: ["GET", "POST"],
+        credentials: true,
     },
 });
 exports.io = io;
