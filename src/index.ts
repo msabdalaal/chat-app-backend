@@ -24,12 +24,12 @@ const port = process.env.PORT || 3000;
 
 app.use(cookieParser());
 app.use(express.json());
-// app.use(
-//   cors({
-//     origin: process.env.CORS_ORIGIN?.split(",") || "*",
-//     credentials: true,
-//   })
-// );
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN?.split(",") || "*",
+    credentials: true,
+  })
+);
 
 app.use("/api/users", userRoutes);
 app.use("/api/chats", chatRoutes);
