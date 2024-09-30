@@ -5,7 +5,8 @@ import { IUser } from "../types";
 
 // Password regex for validation
 const passwordRegex =
-  /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  /^(?=.*[A-Za-z]).{6,}$/;
+  
 
 const userSchema: Schema<IUser> = new mongoose.Schema(
   {
@@ -36,7 +37,7 @@ userSchema.pre<IUser>(
     if (!passwordRegex.test(this.password)) {
       return next(
         new Error(
-          "Password validation failed: Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character."
+          "Password validation failed: Password must be at least 6 characters long and include at least one letter"
         ) as CallbackError
       );
     }

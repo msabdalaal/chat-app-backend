@@ -14,7 +14,6 @@ const io = new Server(server, {
 });
 
 let userSocketMap: IUserSocketMap = {};
-
 export const getReceiverSocketId = (receiverId: string) => {
   return userSocketMap?.[receiverId];
 };
