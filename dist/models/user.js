@@ -16,7 +16,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const bcrypt_1 = __importDefault(require("bcrypt"));
 const validator_1 = __importDefault(require("validator")); // Validator for email validation
 // Password regex for validation
-const passwordRegex = /^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+const passwordRegex = /^(?=.*[A-Za-z]).{6,}$/;
 const userSchema = new mongoose_1.default.Schema({
     name: { type: String, default: "" },
     email: {
@@ -39,7 +39,7 @@ userSchema.pre("save", function (next) {
         if (!this.isModified("password"))
             return next();
         if (!passwordRegex.test(this.password)) {
-            return next(new Error("Password validation failed: Password must be at least 8 characters long and include an uppercase letter, a lowercase letter, a number, and a special character."));
+            return next(new Error("Password validation failed: Password must be at least 6 characters long and include at least one letter"));
         }
         try {
             const salt = yield bcrypt_1.default.genSalt(10);
