@@ -47,11 +47,9 @@ export const createGroupChat = async (req: Request, res: Response) => {
 export const addUserToGroup = async (req: Request, res: Response) => {
   const { userId } = req.body;
   const { groupID } = req.params;
-  console.log(userId, groupID);
   try {
     // Find the group chat and ensure the requester is the admin
     let groupChat = await GroupChat.findById(groupID);
-    console.log(groupChat);
     if (!groupChat) {
       return res.status(404).json({
         success: false,

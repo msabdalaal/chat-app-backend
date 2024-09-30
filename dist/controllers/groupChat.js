@@ -58,11 +58,9 @@ const addUserToGroup = (req, res) => __awaiter(void 0, void 0, void 0, function*
     var _a, _b;
     const { userId } = req.body;
     const { groupID } = req.params;
-    console.log(userId, groupID);
     try {
         // Find the group chat and ensure the requester is the admin
         let groupChat = yield groupChat_1.default.findById(groupID);
-        console.log(groupChat);
         if (!groupChat) {
             return res.status(404).json({
                 success: false,

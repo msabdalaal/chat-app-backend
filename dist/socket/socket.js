@@ -29,7 +29,6 @@ io.on("connection", (socket) => {
     const userId = socket.handshake.query.userId;
     if (userId)
         userSocketMap[(_a = userId === null || userId === void 0 ? void 0 : userId.toString()) !== null && _a !== void 0 ? _a : ""] = socket.id;
-    console.log(userSocketMap);
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
     socket.on("disconnect", () => {
         if (userId)

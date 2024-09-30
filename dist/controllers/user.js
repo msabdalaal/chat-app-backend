@@ -37,7 +37,6 @@ const registerUser = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     try {
         // Check if user already exists
         const existingUser = yield user_1.default.findOne({ email });
-        console.log(existingUser);
         if (existingUser) {
             return res.status(400).json({
                 success: false,
