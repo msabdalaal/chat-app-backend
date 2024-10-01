@@ -77,7 +77,9 @@ export const createMessage = async (req: Request, res: Response) => {
     });
     if (receiverSocketIds) {
       receiverSocketIds
-        .filter((ID) => ID != getReceiverSocketId(req.user?._id?.toString() || ""))
+        .filter(
+          (ID) => ID != getReceiverSocketId(req.user?._id?.toString() || "")
+        )
         .forEach((ID) => {
           io.to(ID!).emit("newMessage", message);
         });
@@ -121,7 +123,30 @@ export const markAllMessagesAsRead = async (req: Request, res: Response) => {
       { $push: { readBy: userId } }, // Add userId to readBy array
       { new: true }
     );
+    const chat = await Chat.findById(chatId);
+    const groupChat = await GroupChat.findById(chatId);
+    const currentChat = chat ? chat : groupChat;
 
+    // Check if chat exists
+    if (!currentChat) {
+      return res.status(404).json({
+        success: false,
+        message: "Chat not found",
+      });
+    }
+    const receiverSocketIds = currentChat.participants.map((user) => {
+      const Id = getReceiverSocketId?.(user.toString()) ?? "";
+      return Id;
+    });
+    if (receiverSocketIds) {
+      receiverSocketIds
+        .filter(
+          (ID) => ID != getReceiverSocketId(req.user?._id?.toString() || "")
+        )
+        .forEach((ID) => {
+          io.to(ID!).emit("readMessages", { chatId: currentChat._id, userId });
+        });
+    }
     res.status(200).json({
       success: true,
       message: `${updatedMessages.modifiedCount} messages marked as read`,

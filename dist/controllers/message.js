@@ -124,6 +124,28 @@ const markAllMessagesAsRead = (req, res) => __awaiter(void 0, void 0, void 0, fu
         const updatedMessages = yield message_1.default.updateMany({ chatId, readBy: { $ne: userId } }, // Only update unread messages for this user
         { $push: { readBy: userId } }, // Add userId to readBy array
         { new: true });
+        const chat = yield chat_1.default.findById(chatId);
+        const groupChat = yield groupChat_1.default.findById(chatId);
+        const currentChat = chat ? chat : groupChat;
+        // Check if chat exists
+        if (!currentChat) {
+            return res.status(404).json({
+                success: false,
+                message: "Chat not found",
+            });
+        }
+        const receiverSocketIds = currentChat.participants.map((user) => {
+            var _a;
+            const Id = (_a = socket_1.getReceiverSocketId === null || socket_1.getReceiverSocketId === void 0 ? void 0 : (0, socket_1.getReceiverSocketId)(user.toString())) !== null && _a !== void 0 ? _a : "";
+            return Id;
+        });
+        if (receiverSocketIds) {
+            receiverSocketIds
+                .filter((ID) => { var _a, _b; return ID != (0, socket_1.getReceiverSocketId)(((_b = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id) === null || _b === void 0 ? void 0 : _b.toString()) || ""); })
+                .forEach((ID) => {
+                socket_1.io.to(ID).emit("readMessages", { chatId: currentChat._id, userId });
+            });
+        }
         res.status(200).json({
             success: true,
             message: `${updatedMessages.modifiedCount} messages marked as read`,

@@ -30,6 +30,25 @@ io.on("connection", (socket) => {
     if (userId)
         userSocketMap[(_a = userId === null || userId === void 0 ? void 0 : userId.toString()) !== null && _a !== void 0 ? _a : ""] = socket.id;
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    socket.on("typing", ({ currentChat }) => {
+        currentChat.participants.forEach((user) => {
+            var _a, _b;
+            if (user._id !== userId) {
+                io.to(userSocketMap[(_b = (_a = user._id) === null || _a === void 0 ? void 0 : _a.toString()) !== null && _b !== void 0 ? _b : ""]).emit("displayTyping", { userId, chatId: currentChat._id });
+            }
+        });
+    });
+    socket.on("stopTyping", ({ currentChat }) => {
+        currentChat.participants.forEach((user) => {
+            var _a, _b;
+            if (user._id !== userId) {
+                io.to(userSocketMap[(_b = (_a = user._id) === null || _a === void 0 ? void 0 : _a.toString()) !== null && _b !== void 0 ? _b : ""]).emit("hideTyping", {
+                    userId,
+                    chatId: currentChat._id,
+                });
+            }
+        });
+    });
     socket.on("disconnect", () => {
         if (userId)
             delete userSocketMap[userId];

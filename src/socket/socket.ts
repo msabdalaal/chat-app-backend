@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
-import { IUserSocketMap } from "../types";
+import { IUser, IUserSocketMap } from "../types";
 
 const app = express();
 
@@ -23,6 +23,26 @@ io.on("connection", (socket) => {
   if (userId) userSocketMap[userId?.toString() ?? ""] = socket.id;
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
 
+  socket.on("typing", ({ currentChat }) => {
+    currentChat.participants.forEach((user: IUser) => {
+      if (user._id !== userId) {
+        io.to(userSocketMap[user._id?.toString() ?? ""]!).emit(
+          "displayTyping",
+          { userId, chatId: currentChat._id }
+        );
+      }
+    });
+  });
+  socket.on("stopTyping", ({ currentChat }) => {
+    currentChat.participants.forEach((user: IUser) => {
+      if (user._id !== userId) {
+        io.to(userSocketMap[user._id?.toString() ?? ""]!).emit("hideTyping", {
+          userId,
+          chatId: currentChat._id,
+        });
+      }
+    });
+  });
   socket.on("disconnect", () => {
     if (userId) delete userSocketMap[userId as string];
     io.emit("getOnlineUsers", Object.keys(userSocketMap));
