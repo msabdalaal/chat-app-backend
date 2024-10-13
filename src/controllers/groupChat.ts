@@ -3,6 +3,7 @@ import GroupChat from "../models/groupChat";
 import User from "../models/user";
 import Message from "../models/message";
 import mongoose from "mongoose";
+import { getReceiverSocketId, io } from "../socket/socket";
 
 // Create a new group chat
 export const createGroupChat = async (req: Request, res: Response) => {
@@ -29,6 +30,20 @@ export const createGroupChat = async (req: Request, res: Response) => {
     // Save the group chat
     await groupChat.save();
     groupChat = await groupChat.populate("participants", "name email");
+
+    const receiverSocketIds = groupChat.participants.map((user) => {
+      const Id = getReceiverSocketId?.(user._id.toString()) ?? "";
+      return Id;
+    });
+    if (receiverSocketIds) {
+      receiverSocketIds
+        .filter(
+          (ID) => ID != getReceiverSocketId(req.user?._id?.toString() || "")
+        )
+        .forEach((ID) => {
+          io.to(ID!).emit("newChat", groupChat);
+        });
+    }
 
     res.status(201).json({
       success: true,
@@ -76,6 +91,13 @@ export const addUserToGroup = async (req: Request, res: Response) => {
     groupChat.participants.push(userId);
     await groupChat.save();
     groupChat = await groupChat.populate("participants", "name email _id");
+
+    const ID = getReceiverSocketId?.(userId.toString()) ?? "";
+
+    if (ID) {
+      io.to(ID!).emit("newChat", groupChat);
+    }
+
     res.status(200).json({
       success: true,
       data: groupChat,

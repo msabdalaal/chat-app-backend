@@ -16,9 +16,10 @@ exports.deleteChat = exports.getChatsForUser = exports.createChat = void 0;
 const chat_1 = __importDefault(require("../models/chat")); // Assuming the Chat model exists
 const user_1 = __importDefault(require("../models/user")); // Assuming the User model exists
 const message_1 = __importDefault(require("../models/message"));
+const socket_1 = require("../socket/socket");
 // Create a new chat between users
 const createChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a;
+    var _a, _b;
     const { participants } = req.body;
     try {
         // Ensure that participants exist and have valid users
@@ -29,13 +30,35 @@ const createChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 message: "One or more participants are invalid",
             });
         }
+        const existingChat = yield chat_1.default.findOne({
+            participants: { $all: [...participants, (_a = req.user) === null || _a === void 0 ? void 0 : _a._id] },
+        });
+        if (existingChat) {
+            return res.status(400).json({
+                success: false,
+                message: "Chat already exists",
+            });
+        }
         // Create a new chat
         let chat = new chat_1.default({
-            participants: [...participants, (_a = req.user) === null || _a === void 0 ? void 0 : _a._id],
+            participants: [...participants, (_b = req.user) === null || _b === void 0 ? void 0 : _b._id],
         });
         // Save the chat to the database
         yield chat.save();
         chat = yield chat.populate("participants", "name email");
+        // Sending Messages to users
+        const receiverSocketIds = chat.participants.map((user) => {
+            var _a;
+            const Id = (_a = socket_1.getReceiverSocketId === null || socket_1.getReceiverSocketId === void 0 ? void 0 : (0, socket_1.getReceiverSocketId)(user._id.toString())) !== null && _a !== void 0 ? _a : "";
+            return Id;
+        });
+        if (receiverSocketIds) {
+            receiverSocketIds
+                .filter((ID) => { var _a, _b; return ID != (0, socket_1.getReceiverSocketId)(((_b = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id) === null || _b === void 0 ? void 0 : _b.toString()) || ""); })
+                .forEach((ID) => {
+                socket_1.io.to(ID).emit("newChat", chat);
+            });
+        }
         res.status(201).json({
             success: true,
             data: chat, // Populating participants with name and email

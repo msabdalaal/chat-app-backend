@@ -16,6 +16,7 @@ exports.deleteChat = exports.getGroupChatsForUser = exports.getGroupChatDetails 
 const groupChat_1 = __importDefault(require("../models/groupChat"));
 const user_1 = __importDefault(require("../models/user"));
 const message_1 = __importDefault(require("../models/message"));
+const socket_1 = require("../socket/socket");
 // Create a new group chat
 const createGroupChat = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
@@ -39,6 +40,18 @@ const createGroupChat = (req, res) => __awaiter(void 0, void 0, void 0, function
         // Save the group chat
         yield groupChat.save();
         groupChat = yield groupChat.populate("participants", "name email");
+        const receiverSocketIds = groupChat.participants.map((user) => {
+            var _a;
+            const Id = (_a = socket_1.getReceiverSocketId === null || socket_1.getReceiverSocketId === void 0 ? void 0 : (0, socket_1.getReceiverSocketId)(user._id.toString())) !== null && _a !== void 0 ? _a : "";
+            return Id;
+        });
+        if (receiverSocketIds) {
+            receiverSocketIds
+                .filter((ID) => { var _a, _b; return ID != (0, socket_1.getReceiverSocketId)(((_b = (_a = req.user) === null || _a === void 0 ? void 0 : _a._id) === null || _b === void 0 ? void 0 : _b.toString()) || ""); })
+                .forEach((ID) => {
+                socket_1.io.to(ID).emit("newChat", groupChat);
+            });
+        }
         res.status(201).json({
             success: true,
             data: groupChat,
@@ -55,7 +68,7 @@ const createGroupChat = (req, res) => __awaiter(void 0, void 0, void 0, function
 exports.createGroupChat = createGroupChat;
 // Add a user to the group chat
 const addUserToGroup = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    var _a, _b;
+    var _a, _b, _c;
     const { userId } = req.body;
     const { groupID } = req.params;
     try {
@@ -84,6 +97,10 @@ const addUserToGroup = (req, res) => __awaiter(void 0, void 0, void 0, function*
         groupChat.participants.push(userId);
         yield groupChat.save();
         groupChat = yield groupChat.populate("participants", "name email _id");
+        const ID = (_c = socket_1.getReceiverSocketId === null || socket_1.getReceiverSocketId === void 0 ? void 0 : (0, socket_1.getReceiverSocketId)(userId.toString())) !== null && _c !== void 0 ? _c : "";
+        if (ID) {
+            socket_1.io.to(ID).emit("newChat", groupChat);
+        }
         res.status(200).json({
             success: true,
             data: groupChat,

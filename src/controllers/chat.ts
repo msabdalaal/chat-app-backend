@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import Chat from "../models/chat"; // Assuming the Chat model exists
 import User from "../models/user"; // Assuming the User model exists
 import Message from "../models/message";
+import { getReceiverSocketId, io } from "../socket/socket";
 
 // Create a new chat between users
 export const createChat = async (req: Request, res: Response) => {
@@ -18,6 +19,17 @@ export const createChat = async (req: Request, res: Response) => {
       });
     }
 
+    const existingChat = await Chat.findOne({
+      participants: { $all: [...participants, req.user?._id] },
+    });
+
+    if (existingChat) {
+      return res.status(400).json({
+        success: false,
+        message: "Chat already exists",
+      });
+    }
+
     // Create a new chat
     let chat = new Chat({
       participants: [...participants, req.user?._id],
@@ -26,6 +38,20 @@ export const createChat = async (req: Request, res: Response) => {
     // Save the chat to the database
     await chat.save();
     chat = await chat.populate("participants", "name email");
+    // Sending Messages to users
+    const receiverSocketIds = chat.participants.map((user) => {
+      const Id = getReceiverSocketId?.(user._id.toString()) ?? "";
+      return Id;
+    });
+    if (receiverSocketIds) {
+      receiverSocketIds
+        .filter(
+          (ID) => ID != getReceiverSocketId(req.user?._id?.toString() || "")
+        )
+        .forEach((ID) => {
+          io.to(ID!).emit("newChat", chat);
+        });
+    }
 
     res.status(201).json({
       success: true,
@@ -73,7 +99,7 @@ export const deleteChat = async (req: Request, res: Response) => {
         message: "Couldn't find chat",
       });
     }
-    const deletedMessages = await Message.deleteMany({chatId : chatID});
+    const deletedMessages = await Message.deleteMany({ chatId: chatID });
     res.status(200).json({
       success: true,
       data: deletedChat,
